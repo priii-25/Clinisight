@@ -6,20 +6,27 @@ const AlertPanel = () => {
     const [alerts, setAlerts] = useState([]);
     const [error, setError] = useState(null);
 
-    const fetchAlerts = async () => {
-        try {
-            const data = await getAlerts();
-            setAlerts(data);
-            setError(null);
-        } catch (err) {
-            console.error('Error fetching alerts:', err);
-            setError('Failed to fetch alerts. Please try again later.');
+    const fetchAlerts = async (retryCount = 3, delay = 2000) => {
+        for (let i = 0; i < retryCount; i++) {
+            try {
+                const data = await getAlerts();
+                setAlerts(data);
+                setError(null);
+                return;
+            } catch (err) {
+                console.error('Error fetching alerts:', err);
+                if (i < retryCount - 1) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    continue;
+                }
+                setError('Failed to fetch alerts. Retrying may help.');
+            }
         }
     };
 
     useEffect(() => {
         fetchAlerts();
-        const interval = setInterval(fetchAlerts, 5000); // Poll every 5 seconds
+        const interval = setInterval(() => fetchAlerts(), 5000); // Poll every 5 seconds
         return () => clearInterval(interval);
     }, []);
 

@@ -2,7 +2,6 @@ from ultralytics import YOLO
 import numpy as np
 import logging
 import torch
-
 logger = logging.getLogger(__name__)
 
 class YoloDetector:
